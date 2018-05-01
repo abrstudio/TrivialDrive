@@ -1,0 +1,5 @@
+<resources>
+    <string name="AbrDefaultConfig">
+        {"version": 1}
+    </string>
+</resources>
