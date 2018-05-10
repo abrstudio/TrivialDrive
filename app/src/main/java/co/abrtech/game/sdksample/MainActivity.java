@@ -18,33 +18,23 @@ package co.abrtech.game.sdksample;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-
-import co.abrtech.game.sdksample.util.IabBroadcastReceiver;
-import co.abrtech.game.sdksample.util.IabBroadcastReceiver.IabBroadcastListener;
-import co.abrtech.game.sdksample.util.IabHelper;
-import co.abrtech.game.sdksample.util.IabHelper.IabAsyncInProgressException;
-import co.abrtech.game.sdksample.util.IabResult;
-import co.abrtech.game.sdksample.util.Inventory;
-import co.abrtech.game.sdksample.util.Purchase;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import co.abrstudio.game.ad.AbrStudioAd;
 import co.abrstudio.game.ad.callback.AbrAdRequestCallback;
 import co.abrstudio.game.ad.callback.AbrShowAdCallback;
 import co.abrstudio.game.ad.core.AbrStudioAdItem;
 import co.abrtech.game.core.AbrStudio;
+import co.abrtech.game.sdksample.util.IabHelper;
+import co.abrtech.game.sdksample.util.IabHelper.IabAsyncInProgressException;
+import co.abrtech.game.sdksample.util.IabResult;
+import co.abrtech.game.sdksample.util.Inventory;
+import co.abrtech.game.sdksample.util.Purchase;
 
 /**
  * Example game using in-app billing version 3.
@@ -97,17 +87,9 @@ import co.abrtech.game.core.AbrStudio;
  * we have to apply its effects to our world and consume it. This
  * is also very important!
  */
-public class MainActivity extends Activity implements OnClickListener {
+public class MainActivity extends Activity /*implements OnClickListener*/ {
     // Debug tag, for logging
     private static final String TAG = "TrivialDrive";
-
-    // Tracks the currently owned infinite gas SKU, and the options in the Manage dialog
-    String mInfiniteGasSku = "";
-    String mFirstChoiceSku = "";
-    String mSecondChoiceSku = "";
-
-    // Used to select between purchasing gas on a monthly or yearly basis
-    private String mSelectedSubscriptionPeriod = "";
 
     // SKUs for our products: gas (consumable)
     private static final String SKU_GAS = "gas";
@@ -155,7 +137,7 @@ public class MainActivity extends Activity implements OnClickListener {
         loadData();
 
         /* base64EncodedPublicKey should be YOUR APPLICATION'S PUBLIC KEY
-         * (that you got from the Google Play developer console). This is not your
+         * (that you got from the CafeBazaar developer console). This is not your
          * developer public key, it's the *app-specific* public key.
          *
          * Instead of just storing the entire literal string here embedded in the
@@ -329,52 +311,6 @@ public class MainActivity extends Activity implements OnClickListener {
                 Log.e(TAG, "onNoNetwork");
             }
         });
-    }
-
-    @Override
-    public void onClick(DialogInterface dialog, int id) {
-        if (id == 0 /* First choice item */) {
-            mSelectedSubscriptionPeriod = mFirstChoiceSku;
-        } else if (id == 1 /* Second choice item */) {
-            mSelectedSubscriptionPeriod = mSecondChoiceSku;
-        } else if (id == DialogInterface.BUTTON_POSITIVE /* continue button */) {
-            /* TODO: for security, generate your payload here for verification. See the comments on
-             *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
-             *        an empty string, but on a production app you should carefully generate
-             *        this. */
-            String payload = "";
-
-            if (TextUtils.isEmpty(mSelectedSubscriptionPeriod)) {
-                // The user has not changed from the default selection
-                mSelectedSubscriptionPeriod = mFirstChoiceSku;
-            }
-
-            List<String> oldSkus = null;
-            if (!TextUtils.isEmpty(mInfiniteGasSku)
-                    && !mInfiniteGasSku.equals(mSelectedSubscriptionPeriod)) {
-                // The user currently has a valid subscription, any purchase action is going to
-                // replace that subscription
-                oldSkus = new ArrayList<String>();
-                oldSkus.add(mInfiniteGasSku);
-            }
-
-            setWaitScreen(true);
-            Log.d(TAG, "Launching purchase flow for gas subscription.");
-            try {
-                mHelper.launchPurchaseFlow(this, mSelectedSubscriptionPeriod, IabHelper.ITEM_TYPE_SUBS,
-                        oldSkus, RC_REQUEST, mPurchaseFinishedListener, payload);
-            } catch (IabAsyncInProgressException e) {
-                complain("Error launching purchase flow. Another async operation in progress.");
-                setWaitScreen(false);
-            }
-            // Reset the dialog options
-            mSelectedSubscriptionPeriod = "";
-            mFirstChoiceSku = "";
-            mSecondChoiceSku = "";
-        } else if (id != DialogInterface.BUTTON_NEGATIVE) {
-            // There are only four buttons, this should not happen
-            Log.e(TAG, "Unknown button clicked in subscription dialog: " + id);
-        }
     }
 
     @Override
